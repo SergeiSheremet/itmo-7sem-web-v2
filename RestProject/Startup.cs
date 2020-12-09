@@ -1,15 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using RestProject.Services;
 
 namespace RestProject
 {
@@ -25,6 +19,9 @@ namespace RestProject
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IValueService, ValueService>();
+
+            services.AddSwaggerGen();
             services.AddControllers();
         }
 
@@ -37,6 +34,19 @@ namespace RestProject
             }
 
             app.UseHttpsRedirection();
+            
+            app.UseStaticFiles();
+            app.UseSwagger(options =>
+            {
+                options.RouteTemplate = "docs/{documentName}/docs.json";
+            });
+
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/docs/v1/docs.json", "Rest Project v1");
+                options.RoutePrefix = "docs";
+                options.InjectStylesheet("/swagger-ui/custom.css");
+            });
 
             app.UseRouting();
 
